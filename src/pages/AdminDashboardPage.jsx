@@ -6,31 +6,35 @@ import { useNavigate } from 'react-router';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import DraggableItem from './DnD/DraggableItem';
+import arrowIcon from '../utils/icons/upvote.png'
 
 function AdminDashboardPage() {
   const [data, setData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const { dispatch } = React.useContext(AuthContext);
   const navigate = useNavigate();
 
-  async function fetchData() {
+  async function fetchData(currentPage = 1) {
     let skd = new MkdSDK();
     try {
       const payload = {
         "payload": {},
-        "page": 1,
+        "page": currentPage,
         "limit": 10
       };
       const method = 'PAGINATE';
       const response = await skd.callRestAPI(payload, method);
       setData(response.list || []);
+      setTotalPages(response.num_pages);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   }
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(currentPage); // Pass currentPage as the page parameter
+  }, [currentPage]);
 
   console.log(data);
 
@@ -40,10 +44,26 @@ function AdminDashboardPage() {
     console.log('logout');
   }
 
+  function handleNextPage() {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      fetchData(currentPage + 1);
+    }
+  }
+
+  function handlePreviousPage() {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      fetchData(currentPage - 1);
+    }
+  }
+
+  const isPreviousDisabled = currentPage
 
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <>
+
       <div className='px-20  h-screen text-white'>
         <section className='Header flex justify-between items-center'>
           <h2 className='text-4xl font-black text-white '>APP</h2>
@@ -60,34 +80,31 @@ function AdminDashboardPage() {
             <p className='font-thin '>11:34</p>
           </div>
         </section>
-        
-        <ul className='py-5'>
-          {data.map((item, index) => (
-            <DraggableItem key={item.id} item={item} index={index} moveItem={(fromIndex, toIndex) => {
-              const newData = [...data];
-              const itemToMove = newData[fromIndex];
-              newData.splice(fromIndex, 1);
-              newData.splice(toIndex, 0, itemToMove);
-              setData(newData);
-            }} />
-          ))}
-        </ul>
-
-            {/* //dumy table  */}
-        {/* <ul className='py-5'>
-          {data.map((item, index) => (
-            <div className='flex items-center h-[96px] gap-5 mb-5 border-[1px] rounded-[25px] border-slate-400'>
-              <li key={index} className='pl-8 pr-5'>{item.id}</li>
-              <img key={index} className=' w-[118px] h-[64px] rounded-md' src={item.photo} />
-              <li key={index} className=' w-[364px] h-[56px]  text-[20px] font-thin lading-[28px]'>{item.title}</li>
-              <li key={index}>{item.username}</li>
-              <li key={index} className=''>{item.like}</li>
-            </div>
-          ))}
-        </ul> */}
+        <DndProvider backend={HTML5Backend}>
+          <ul className='py-5'>
+            {data.map((item, index) => (
+              <DraggableItem key={item.id} item={item} index={index} moveItem={(fromIndex, toIndex) => {
+                const newData = [...data];
+                const itemToMove = newData[fromIndex];
+                newData.splice(fromIndex, 1);
+                newData.splice(toIndex, 0, itemToMove);
+                setData(newData);
+              }} />
+            ))}
+          </ul>
+        </DndProvider>
+        <section className='pagination py-10 flex justify-center gap-10 items-center'>
+          <button className=' bg-[#1D1D1D] border-[0.01px] border-[#a0fc04]  p-4 rounded-md' onClick={handlePreviousPage}>
+          <img className='rotate-[-90deg]' src={arrowIcon} />
+          </button>
+          <span>Page {currentPage} of {totalPages}</span>
+          <button  className=' bg-[#1D1D1D] border-[0.01px] border-[#a0fc04]  p-4 rounded-md'  onClick={handleNextPage}>
+          <img className='rotate-[90deg]' src={arrowIcon} />
+          </button>
+        </section>
       </div>
-    </DndProvider>
 
+    </>
   );
 }
 
