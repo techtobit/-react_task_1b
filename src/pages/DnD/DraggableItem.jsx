@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import upVoteIcon from '../../utils/icons/upvote.png';
+import avatarIcon from '../../utils/icons/usericon.png';
 
 const DraggableItem = ({ item, index, moveItem }) => {
     const [{ isDragging }, drag] = useDrag({
@@ -36,9 +37,11 @@ const DraggableItem = ({ item, index, moveItem }) => {
                 <div className='px-5'>{item.id}</div>
                 <img className='w-[118px] h-[64px] rounded-md' src={item.photo} />
                 <div className='w-[364px] h-[56px] text-[20px] gap-5 leading-[28px]'>{item.title}</div>
+                <div className='flex item-center pl-10 text-[#DBFD51] gap-3 justfiy-start'>
+                    <img src={avatarIcon} />
+                    {item.username}
+                </div>
             </div>
-
-                <div>{item.username}</div>
             <div className=' flex items-center gap-2  text-[16px]'>{item.like}
                 <img src={upVoteIcon} />
             </div>
