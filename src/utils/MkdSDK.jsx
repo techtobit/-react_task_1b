@@ -3,7 +3,7 @@ export default function MkdSDK() {
   this._project_id = "reacttask";
   this._secret = "d9hedycyv6p7zw8xi34t9bmtsjsigy5t7";
   this._BearerToken = "cmVhY3R0YXNrOmQ5aGVkeWN5djZwN3p3OHhpMzR0OWJtdHNqc2lneTV0Nw==";
-  this._table = "";
+  this._table = "video";
   this._custom = "";
   this._method = "";
 
@@ -37,9 +37,6 @@ export default function MkdSDK() {
       if (response.ok) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.role);
-        // this.check(data.role);
-        // if(role){
-        // }
         return true;
       } else {
         throw new Error(data.message);
@@ -127,8 +124,8 @@ export default function MkdSDK() {
         method: "POST",
         headers: {
           // 'Content-Type': 'application/json',
-          Authorization: "Bearer " + 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MTQxOTY3NjAsImV4cCI6MTcxNDIzMjc2MH0.m8KyxPLk1YrRAUyWZmLUCEpRXokU12SDkkVnH00Y3H4',
-          'x-project' :'cmVhY3R0YXNrOmQ5aGVkeWN5djZwN3p3OHhpMzR0OWJtdHNqc2lneTV0Nw==',
+          "x-project": this._BearerToken,
+          Authorization: "Bearer " + localStorage.getItem("token"),
         },
         body: JSON.stringify({
           "role": "admin"
