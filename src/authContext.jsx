@@ -17,12 +17,11 @@ const reducer = (state, action) => {
         return {
           ...state,
           isAuthenticated: true,
-          user: null, // Assuming user details are retrieved separately
+          user: null, 
           token: localStorage.getItem("token"),
           role: localStorage.getItem("role"),
         };
       } else {
-        // Handle login failure (e.g., display error message)
         return state;
       }
       break;
@@ -60,7 +59,7 @@ const AuthProvider = ({ children }) => {
     if (token && role) {
       dispatch({
         type: "LOGIN",
-        payload: { success: true }, // Assuming token presence indicates successful login
+        payload: { success: true },
       });
     }
   }, []);

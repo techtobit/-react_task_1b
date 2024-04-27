@@ -1,13 +1,14 @@
 export default function MkdSDK() {
   this._baseurl = "https://reacttask.mkdlabs.com";
   this._project_id = "reacttask";
-  this._secret = "cmVhY3R0YXNrOmQ5aGVkeWN5djZwN3p3OHhpMzR0OWJtdHNqc2lneTV0Nw==";
+  this._secret = "d9hedycyv6p7zw8xi34t9bmtsjsigy5t7";
+  this._BearerToken = "cmVhY3R0YXNrOmQ5aGVkeWN5djZwN3p3OHhpMzR0OWJtdHNqc2lneTV0Nw==";
   this._table = "";
   this._custom = "";
   this._method = "";
 
-  // const raw = this._project_id + ":" + this._secret;
-  const raw = this._secret;
+  const raw = this._project_id + ":" + this._secret;
+  // const raw = this._BearerToken;
   let base64Encode = btoa(raw);
 
   this.setTable = function (table) {
@@ -15,29 +16,33 @@ export default function MkdSDK() {
   };
   
   this.login = async function (email, password, role) {
-    const payload = {
-      email,
-      password,
-      role, // Assuming role is passed as a prop during login
-    };
-  
-    const header = this.getHeader();
-  
+
     try {
-      const response = await fetch(this.baseUrl() + "/v1/api/rest/auth/LOGIN", {
+      const response = await fetch(this.baseUrl() + "/v2/api/lambda/login", {
         method: "POST",
-        headers: header,
-        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-project' :`${this._BearerToken}`, 
+          // 'x-project' :base64Encode, //geting 401 issue with decoded token 
+        },
+        body: JSON.stringify({
+          "email": email,
+          "password": password,
+          "role": role,
+        })
       });
   
-      const jsonResponse = await response.json();
+      const data = await response.json();
   
       if (response.ok) {
-        localStorage.setItem("token", jsonResponse.token);
-        localStorage.setItem("role", role); // Assuming successful login stores role
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role);
+        // this.check(data.role);
+        // if(role){
+        // }
         return true;
       } else {
-        throw new Error(jsonResponse.message);
+        throw new Error(data.message);
       }
     } catch (error) {
       throw new Error(error.message);
@@ -49,7 +54,7 @@ export default function MkdSDK() {
   this.getHeader = function () {
     return {
       Authorization: "Bearer " + localStorage.getItem("token"),
-      "x-project": base64Encode,
+      "x-project": this._BearerToken,
     };
   };
 
@@ -60,7 +65,7 @@ export default function MkdSDK() {
   this.callRestAPI = async function (payload, method) {
     const header = {
       "Content-Type": "application/json",
-      "x-project": base64Encode,
+      "x-project": this._BearerToken,
       Authorization: "Bearer " + localStorage.getItem("token"),
     };
 
@@ -115,9 +120,32 @@ export default function MkdSDK() {
     }
   };  
 
-  this.check = async function (role) {
-    //TODO
+  this.check = async function () {
+
+    try {
+      const response = await fetch(this.baseUrl() + "/v2/api/lambda/check", {
+        method: "POST",
+        headers: {
+          // 'Content-Type': 'application/json',
+          Authorization: "Bearer " + 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MTQxOTY3NjAsImV4cCI6MTcxNDIzMjc2MH0.m8KyxPLk1YrRAUyWZmLUCEpRXokU12SDkkVnH00Y3H4',
+          'x-project' :'cmVhY3R0YXNrOmQ5aGVkeWN5djZwN3p3OHhpMzR0OWJtdHNqc2lneTV0Nw==',
+        },
+        body: JSON.stringify({
+          "role": "admin"
+        })
+      });
+  
+      if (!response.ok) {
+        throw new Error('Invalid response: ' + response.status);
+      }
+  
+      const data = await response.json();
+      console.log('Admin user found', data.role);
+    } catch (error) {
+      throw new Error('Error in user type checking: ' + error.message);
+    }
   };
+  
 
   return this;
 }

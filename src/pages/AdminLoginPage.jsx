@@ -26,11 +26,12 @@ const AdminLoginPage = () => {
   });
 
   const onSubmit = async (data) => {
+    let sdk = new MkdSDK();
     try {
-      const success = await sdk.login(data.email, data.password, "admin"); // Assuming login is for admin role
+      const success = await sdk.login(data.email, data.password,"admin"); 
       if (success) {
         dispatch({ type: "LOGIN", payload: { success } });
-        navigate("/admin/dashboard"); // Redirect to admin dashboard after successful login
+        navigate("/admin/dashboard");
       }
     } catch (error) {
       setError("apiError", {
@@ -38,7 +39,10 @@ const AdminLoginPage = () => {
         message: error.message,
       });
     }
+    const checkRole = await sdk.check();
+    console.log(checkRole);
   };
+
   
 
   return (
