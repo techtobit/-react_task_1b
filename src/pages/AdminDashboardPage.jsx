@@ -7,11 +7,13 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import DraggableItem from './DnD/DraggableItem';
 import arrowIcon from '../utils/icons/upvote.png'
+import { Bars } from 'react-loader-spinner'
 
 function AdminDashboardPage() {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const { dispatch } = React.useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -29,6 +31,8 @@ function AdminDashboardPage() {
       setTotalPages(response.num_pages);
     } catch (error) {
       console.error('Error fetching data:', error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -80,26 +84,39 @@ function AdminDashboardPage() {
             <p className='font-thin '>11:34</p>
           </div>
         </section>
+        {isLoading && (
+          <div className="loading-container flex items-center justify-center">
+            <Bars
+              height="80"
+              width="80"
+              color="#a0fc04~"
+              ariaLabel="bars-loading"
+              wrapperStyle={{}}
+              wrapperClass=""
+              visible={true} />
+          </div>
+        )}
         <DndProvider backend={HTML5Backend}>
           <ul className='py-5'>
-            {data.map((item, index) => (
-              <DraggableItem key={item.id} item={item} index={index} moveItem={(fromIndex, toIndex) => {
-                const newData = [...data];
-                const itemToMove = newData[fromIndex];
-                newData.splice(fromIndex, 1);
-                newData.splice(toIndex, 0, itemToMove);
-                setData(newData);
-              }} />
-            ))}
+            {
+              data.map((item, index) => (
+                <DraggableItem key={item.id} item={item} index={index} moveItem={(fromIndex, toIndex) => {
+                  const newData = [...data];
+                  const itemToMove = newData[fromIndex];
+                  newData.splice(fromIndex, 1);
+                  newData.splice(toIndex, 0, itemToMove);
+                  setData(newData);
+                }} />
+              ))}
           </ul>
         </DndProvider>
         <section className='pagination py-10 flex justify-center gap-10 items-center'>
           <button className=' bg-[#1D1D1D] border-[0.01px] border-[#a0fc04]  p-4 rounded-md' onClick={handlePreviousPage}>
-          <img className='rotate-[-90deg]' src={arrowIcon} />
+            <img className='rotate-[-90deg]' src={arrowIcon} />
           </button>
           <span>Page {currentPage} of {totalPages}</span>
-          <button  className=' bg-[#1D1D1D] border-[0.01px] border-[#a0fc04]  p-4 rounded-md'  onClick={handleNextPage}>
-          <img className='rotate-[90deg]' src={arrowIcon} />
+          <button className=' bg-[#1D1D1D] border-[0.01px] border-[#a0fc04]  p-4 rounded-md' onClick={handleNextPage}>
+            <img className='rotate-[90deg]' src={arrowIcon} />
           </button>
         </section>
       </div>
